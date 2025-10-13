@@ -39,8 +39,8 @@ function verificarStatusPedido(numPedido) {
   try{  
     const dadosPedidos = sheetPedidos.getDataRange().getValues();
 
-    const colNumPedido = dadosPedidos[0].indexOf("Num_Pedido");
-    const colStatus = dadosPedidos[0].indexOf("Status");
+    const colNumPedido = dadosPedidos[0].indexOf("Num_Pedido"); // returns the index of the Num_Pedido column
+    const colStatus = dadosPedidos[0].indexOf("Status"); // returns the index of the Status column
 
     for (let i = 1; i < dadosPedidos.length; i++) {
       if (dadosPedidos[i][colNumPedido] === numPedido) {
