@@ -17,8 +17,8 @@ function adicionarItensUltimaExped() {
     const idExp = ultimaLinhaExped[colExped_ID];
     const numPedido = ultimaLinhaExped[colExped_NumPedido];
 
-    // filtra itens do pedido correspondente
-    const itensPedido = dadosPedItens.slice(1).filter(linha => linha[colPed_NumPedido] === numPedido);
+    // here is filtered the rows in pedItens related to the num_pedido of the last row of the exped table  
+    const itensPedido = dadosPedItens.slice(1).filter(linha => linha[colPed_NumPedido] === numPedido); // the method slice(1) take off the the first element of the array
 
     // adiciona cada item na aba expedItens
     itensPedido.forEach(linha => {
