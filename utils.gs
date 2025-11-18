@@ -54,8 +54,6 @@ function adicionarItensUltimaExped() {
       sheetExpedItens.appendRow([idExp, codItem, qtdAExpedir]); // here the item is added in new row if there is itens remaining
     });
 
-    Logger.log(`Adicionados ${itensPedido.length} itens para o ID_Exp ${idExp}`);
-
     function checkItens(codItem){
       const expedItensByItem = dadosExpedItens.slice(1).filter(row => { // the filter method iterates through the rows and if true is returned in its signature the row is selected, could be filter(true)
         const filteredRowByCodItem = row[colExpedItemCodItem] === codItem
@@ -130,11 +128,16 @@ function mudaStatusEntregue(numPedido) {
  }
 }
 
+ function test(){
+  atualizarStatusPedido("dc1e8d55")
+
+ }
 function atualizarStatusPedido(numPedido) {
 
  try{ 
   const target = String(numPedido).trim();
   const ss = SpreadsheetApp.openById(sheetId);
+  //console.log(target)
 
 
   const dadosPedidos = sheetPedidos.getDataRange().getValues();
@@ -142,7 +145,7 @@ function atualizarStatusPedido(numPedido) {
   const dadosExped = sheetExped.getDataRange().getValues();
   const dadosExpedItens = sheetExpedItens.getDataRange().getValues();
 
-  // --- índices (valide nomes de coluna com exatidão) ---
+  // --- índices ---
   const iPed_NumPedido = dadosPedItens[0].indexOf("Num_Pedido");
   const iPed_CodItem = dadosPedItens[0].indexOf("Cod_Item");
   const iPed_QtdPed = dadosPedItens[0].indexOf("Qtd_Ped");
@@ -156,6 +159,7 @@ function atualizarStatusPedido(numPedido) {
 
   const iPedidos_NumPedido = dadosPedidos[0].indexOf("Num_Pedido");
   const iPedidos_Status = dadosPedidos[0].indexOf("Status");
+  //console.log(iPedidos_Status)
 
   // helper
   const toNum = v => {
@@ -163,7 +167,7 @@ function atualizarStatusPedido(numPedido) {
     return isNaN(n) ? 0 : n;
   };
 
-  // --- 1) construir mapa dos itens pedidos para numPedido ---
+  // --- 1) construir mapa (objeto javascript) dos itens pedidos para numPedido ---
   const pedMap = {}; // codItem -> qtdPed
   for (let r = 1; r < dadosPedItens.length; r++) {
     const row = dadosPedItens[r];
@@ -189,6 +193,8 @@ function atualizarStatusPedido(numPedido) {
       idExpList.push(String(row[iExped_ID_Exp]).trim());
     }
   }
+  console.log("----1---")
+  console.log(idExpList)
 
   if (idExpList.length === 0) {
     Logger.log(`Nenhuma expedição (entrada em 'exped') encontrada para o pedido ${target}. Status definido como "Confirmado".`);
@@ -226,7 +232,8 @@ function atualizarStatusPedido(numPedido) {
     if (!cod) continue;
     expedMap[cod] = (expedMap[cod] || 0) + qtd;
   }
-
+  console.log("----2---")
+  console.log(expedMap)
   // --- 4) comparar e decidir status ---
   let algumExpedido = false;
   let todosCompletos = true;
@@ -268,4 +275,5 @@ function atualizarStatusPedido(numPedido) {
     throw error
  }
 }
+
 
