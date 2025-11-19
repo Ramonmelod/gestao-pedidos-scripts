@@ -2,7 +2,7 @@ function adicionarItensUltimaExped() {
 
   try{
 
-    const dadosExped = sheetExped.getDataRange().getValues();
+
     const dadosPedItens = sheetPedItens.getDataRange().getValues();
      const dadosExpedItens = sheetExpedItens.getDataRange().getValues();
 
@@ -16,70 +16,92 @@ function adicionarItensUltimaExped() {
     const colExpedItemIdExp = dadosExpedItens[0].indexOf("ID_Exp");
     const colExpedItemQtdExp = dadosExpedItens[0].indexOf("Qtd_Exp");
 
-  
-
-    // última linha da aba exped
+    // last row of table exped
     const ultimaLinhaExped = dadosExped[dadosExped.length - 1];
     const idExp = ultimaLinhaExped[colExped_ID];
     const numPedido = ultimaLinhaExped[colExped_NumPedido];
 
-    // filtra itens do pedido correspondente
-    const itensPedido = dadosPedItens.slice(1).filter(linha => linha[colPed_NumPedido] === numPedido);
     
-    
-    // filter ID_Exp related to Num_Pedido
-     const idExpRelativoAoPedido = dadosExped.slice(1).filter(linha => linha[colExped_NumPedido] === numPedido); //stores all the rows where Id_Exp matches the Num_Pedido from the last line
-     const idExpFiltrados = idExpRelativoAoPedido.map(linha => linha[0]);
-     //console.log(idExpFiltrados)
-    
+    expedRestOfItens(numPedido,idExp)// here is called the function that adds the rest of the itens
 
-    //Add the remaining itens from the order to the table expedItens
-    itensPedido.forEach(linha => {
-      const codItem = linha[colPed_CodItem];
-      Logger.log(`Verificando quantitativo do item de código: ${codItem}`)
-      const expedItensByItemByIdExp = checkItens(codItem) //receives rows related to num_pedido and to cod_item
-      Logger.log('Linhas relacionadas ao num_pedido e ao cod_item abaixo:')
-      Logger.log(expedItensByItemByIdExp)
-      const arrayQtd = expedItensByItemByIdExp.map(linha => linha[colExpedItemQtdExp])
-      const qtdJaExped = arrayQtd.reduce((acumulador, qtd)=>{
-        return acumulador + qtd
-      },0)   
-      const qtdAExpedir = linha[colPed_QtdPed] - qtdJaExped;
-      Logger.log(`Quantidade disponível do item de código ${codItem} a expedir: ${qtdAExpedir}`)
-      if(qtdAExpedir <= 0){
-        console.log(`Não há mais quantitativo para expedir para o item de código: ${codItem} `)
-        return //makes the the thread come out from the callback funtion of the forEach
-      }
-
-      sheetExpedItens.appendRow([idExp, codItem, qtdAExpedir]); // here the item is added in new row if there is itens remaining
-    });
-
-    function checkItens(codItem){
-      const expedItensByItem = dadosExpedItens.slice(1).filter(row => { // the filter method iterates through the rows and if true is returned in its signature the row is selected, could be filter(true)
-        const filteredRowByCodItem = row[colExpedItemCodItem] === codItem
-
-        return filteredRowByCodItem
-        }); // take all the lines retated to the item. Need to take only the related to do num_pedidos    
-
-      const expedItensByItemByIdExp = expedItensByItem.filter(row =>{
-      filteredRowByIdExp = false
-      for(let i = 0; i < idExpFiltrados.length; i ++)
-      {
-        if(row[colExpedItemIdExp] === idExpFiltrados[i]) // here is verified if Id_Exp from the row is related to num_pedido
-        {
-          filteredRowByIdExp = true
-      }
-      }
-      return filteredRowByIdExp //true of false is returned
-      })
-    
-      return expedItensByItemByIdExp // returns the rows related to num_pedido and cod_item
-      }
-    
   }catch(error){
     Logger.log(`Na função adicionarItensUltimaExped ocorreu o erro: ${error}`)
     throw error
   }
+}
+
+function expedRestOfItens(numPedido,idExp){
+  try{
+    //dadosPedidos
+    //dadosPedItens
+    //dadosExped
+    //dadosExpedItens
+
+    const colExped_ID = dadosExped[0].indexOf("ID_Exp");
+    const colExped_NumPedido = dadosExped[0].indexOf("Num_Pedido");
+    const colPed_NumPedido = dadosPedItens[0].indexOf("Num_Pedido");
+    const colPed_CodItem = dadosPedItens[0].indexOf("Cod_Item");
+    const colPed_QtdPed = dadosPedItens[0].indexOf("Qtd_Ped");
+    const colExpedItemCodItem = dadosExpedItens[0].indexOf("Cod_Item");
+    const colExpedItemIdExp = dadosExpedItens[0].indexOf("ID_Exp");
+    const colExpedItemQtdExp = dadosExpedItens[0].indexOf("Qtd_Exp");
+
+
+
+    //const numPedido = ultimaLinhaExped[colExped_NumPedido];
+
+    // filtra itens do pedido correspondente
+    const itensPedido = dadosPedItens.slice(1).filter(linha => linha[colPed_NumPedido] === numPedido);
+    // filter ID_Exp related to Num_Pedido
+    const idExpRelativoAoPedido = dadosExped.slice(1).filter(linha => linha[colExped_NumPedido] === numPedido); //stores all the rows where Id_Exp matches the Num_Pedido from the last line
+    const idExpFiltrados = idExpRelativoAoPedido.map(linha => linha[0]);
+    //console.log(idExpFiltrados)
+
+    //Add the remaining itens from the order to the table expedItens
+    itensPedido.forEach(linha => {
+    const codItem = linha[colPed_CodItem];
+    Logger.log(`Verificando quantitativo do item de código: ${codItem}`)
+    const expedItensByItemByIdExp = checkItens(codItem) //receives rows related to num_pedido and to cod_item
+    Logger.log('Linhas relacionadas ao num_pedido e ao cod_item abaixo:')
+    Logger.log(expedItensByItemByIdExp)
+    const arrayQtd = expedItensByItemByIdExp.map(linha => linha[colExpedItemQtdExp])
+    const qtdJaExped = arrayQtd.reduce((acumulador, qtd)=>{
+    return acumulador + qtd
+    },0)
+    const qtdAExpedir = linha[colPed_QtdPed] - qtdJaExped;
+    Logger.log(`Quantidade disponível do item de código ${codItem} a expedir: ${qtdAExpedir}`)
+    if(qtdAExpedir <= 0){
+    console.log(`Não há mais quantitativo para expedir para o item de código: ${codItem} `)
+    return //makes the the thread come out from the callback funtion of the forEach
+    }
+
+    sheetExpedItens.appendRow([idExp, codItem, qtdAExpedir]); // here the item is added in new row if there is itens remaining
+    });
+
+    function checkItens(codItem){
+    const expedItensByItem = dadosExpedItens.slice(1).filter(row => { // the filter method iterates through the rows and if true is returned in its signature the row is selected, could be filter(true)
+    const filteredRowByCodItem = row[colExpedItemCodItem] === codItem
+
+    return filteredRowByCodItem
+    }); // take all the lines retated to the item. Need to take only the related to do num_pedidos
+
+    const expedItensByItemByIdExp = expedItensByItem.filter(row =>{
+    filteredRowByIdExp = false
+    for(let i = 0; i < idExpFiltrados.length; i ++)
+    {
+    if(row[colExpedItemIdExp] === idExpFiltrados[i]) // here is verified if Id_Exp from the row is related to num_pedido
+    {
+    filteredRowByIdExp = true
+    }
+    }
+    return filteredRowByIdExp //true of false is returned
+    })
+    return expedItensByItemByIdExp // returns the rows related to num_pedido and cod_item
+    }
+  }catch(error){
+    Logger.log(`Na função expedRestOfItens ocorreu o erro: ${error}`)
+    throw error
+    }
 }
 
 function verificarStatusPedido(numPedido) {
@@ -275,5 +297,31 @@ function atualizarStatusPedido(numPedido) {
     throw error
  }
 }
+function fixExpedItens(){
+    const dadosPedidos = sheetPedidos.getDataRange().getValues();
+    const colNumPedido = dadosPedidos[0].indexOf("Num_Pedido"); // returns the index of the Num_Pedido column
+    const colStatus = dadosPedidos[0].indexOf("Status");
 
+    for (let i = 1; i < dadosPedidos.length; i++) {
+      const numPedido = dadosPedidos[i][colNumPedido]
+      console.log(numPedido)
+      atualizarStatusPedido(numPedido)
+  
+    }
 
+}
+function getLastOrder(){
+    const colDadosPedidos_NumPedido = dadosPedidos[0].indexOf("Num_Pedido");
+    const ultimaLinhaPedidos = dadosPedidos[dadosPedidos.length - 1];
+    const numPedido = ultimaLinhaPedidos[colDadosPedidos_NumPedido];
+    console.log(ultimaLinhaPedidos)
+    console.log(numPedido)
+    return numPedido
+}
+function getLastIdExped(){
+    const colDadosExped_idExp = dadosExped[0].indexOf("ID_Exp");
+    const ultimaLinhaExped = dadosExped[dadosExped.length - 1];
+    const idExp = ultimaLinhaExped[colDadosExped_idExp];
+    console.log(idExp)
+    return idExp
+}
